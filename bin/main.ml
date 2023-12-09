@@ -1,4 +1,5 @@
 open Graphics
+open Vector3
 
 let px_width = 600
 let px_height = 600;;
@@ -6,70 +7,6 @@ let px_height = 600;;
 open_graph (" " ^ (string_of_int px_width) ^ "x" ^ (string_of_int px_height));;
 
 let pi = 4.0 *. atan 1.0;;
-
-(*Vectors*)
-type vec3 =
-  | Vector3 of float * float * float;;
-
-let dot v1 v2 =
-  match v1, v2 with
-  | Vector3(a, b, c), Vector3(x, y, z) ->
-    a *. x +. b *. y +. c *. z;;
-
-let add v1 v2 =
-  match v1, v2 with
-  | Vector3(a, b, c), Vector3(x, y, z) ->
-    Vector3(a +. x, b +. y, c +. z);;
-
-let subtract v1 v2 =
-  match v1, v2 with
-  | Vector3(a, b, c), Vector3(x, y, z) ->
-    Vector3(a -. x, b -. y, c -. z);;
-
-let scale v1 scaler =
-  match v1 with
-  | Vector3(a, b, c) ->
-    Vector3(a *. scaler, b *. scaler, c *. scaler);;
-
-let mult v1 v2 =
-  match v1, v2 with
-  | Vector3(a, b, c), Vector3(x, y, z) ->
-    Vector3(a *. x, b *. y, c *. z);;
-
-let div v1 v2 =
-  match v1, v2 with
-  | Vector3(a, b, c), Vector3(x, y, z) ->
-    Vector3(a /. x, b /. y, c /. z);;
-    
-let reflect_v1_in_v2 v1 v2 =
-  subtract (scale v2 (2. *. (dot v1 v2))) v1;;
-
-let magnitude v =
-  match v with
-  | Vector3(x, y, z) -> sqrt (x *. x +. y *. y +. z *. z);;
-
-let normalise v =
-  let mag = magnitude v in
-  match v with
-  | Vector3(x, y, z) ->
-    Vector3(x /. mag, y /. mag, z /. mag);;
-
-let power v exp =
-  match v with
-  | Vector3(x, y, z) -> Vector3(x ** exp, y ** exp, z ** exp);;
-
-let inverse v =
-  match v with
-  | Vector3(x, y, z) -> Vector3(1. /. x, 1. /. y, 1. /. z);;
-
-let rotate_about v origin (Vector3(x_rad, y_rad, z_rad)) =
-  match subtract v origin with
-  | Vector3(x, y, z) ->
-    add origin (Vector3(
-      x *. (cos y_rad) *. (cos z_rad) -. y *. (cos y_rad) *. (sin z_rad) +. z *. (sin y_rad),
-      x *. (cos x_rad) *. (sin z_rad) +. y *. (cos x_rad) *. (cos z_rad) -. z *. (sin x_rad) *. (cos z_rad),
-      x *. (sin x_rad) *. (sin y_rad) +. y *. (sin x_rad) *. (cos y_rad) +. z *. (cos x_rad) *. (cos y_rad)
-    ));;
 
 (*Colour*)
 let vec3_of_colour c =
@@ -145,6 +82,17 @@ let sphere2: shape_attr = {
   });
 };;
 
+let sphere3: shape_attr = {
+  colour = (rgb 0 0 255);
+  k_d = 5.;
+  k_s = 1.2;
+  phong_alpha = 10.;
+  shp_info=Sphere({
+    center = Vector3(2., -2., 4.);
+    radius=0.5;
+  });
+};;
+
 let plane1: shape_attr = {
   colour = (rgb 0 0 255);
   k_d = 3.;
@@ -156,7 +104,7 @@ let plane1: shape_attr = {
   });
 };;
 
-let shapes = [sphere1; sphere2; plane1];
+let shapes = [sphere1; sphere2; sphere3; plane1];
 
 (*Lights*)
 type point_light = {
@@ -166,13 +114,13 @@ type point_light = {
 };;
 
 let pl1 = {
-  position = Vector3(0., 0., 3.);
+  position = Vector3(0., 2., 3.);
   colour = (rgb 255 255 255);
   intensity = 1.;
 };;
 
 let pl2 = {
-  position = Vector3(-1., 0., 3.8);
+  position = Vector3(0., -2., 4.);
   colour = (rgb 255 255 255);
   intensity = 1.;
 };;
@@ -244,31 +192,6 @@ let plane_intersection plane (Ray(origin, direction)) =
     if (s < 0.) then null_hit
     else {shapeRec=plane; distance=s; intersection=add origin (scale direction s); normal=shp_info.normal}
 
-let illuminate (shp: shape_attr) intersection normal origin =
-
-  let c_diff = map_colour_from_255_to_1 (vec3_of_colour shp.colour) in
-
-  let ambient = (scale c_diff 0.05) in (*Ambient*)
-  
-  let rec loop_pls pls =
-    match pls with
-    | [] -> Vector3(0., 0., 0.)
-    | h :: t ->
-      let distance = (magnitude (subtract h.position intersection)) in
-      let illumination = get_illumination_of_pointlight c_diff h.intensity distance in
-
-      let l = normalise (subtract h.position intersection) in
-      let r = normalise (reflect_v1_in_v2 l normal) in
-      let v = normalise (subtract origin intersection) in
-
-      let c_spec = map_colour_from_255_to_1 (vec3_of_colour h.colour) in
-
-      let diffuse = (scale (scale (scale c_diff shp.k_d) illumination) (max 0. (dot normal l))) in
-      let specular = (scale (scale (scale c_spec shp.k_s) illumination) ((max 0. (dot r v)) ** shp.phong_alpha)) in
-      add (add specular diffuse) (loop_pls t)
-  in
-  colour_of_vec3 (map_colour_from_1_to_255 (add (loop_pls pls) ambient));;
-
 let find_closest_hit ray =
   let compare_and_return s1 s2 = if s1.distance < s2.distance then s1 else s2 in
   let rec loop_objects objects =
@@ -279,9 +202,35 @@ let find_closest_hit ray =
       | Sphere (_) -> compare_and_return (sphere_intersection h ray) (loop_objects t)
       | Plane (_) -> compare_and_return (plane_intersection h ray) (loop_objects t)
   in
-  let hit = loop_objects shapes in
-  if (hit.distance = infinity) then null_hit
-  else hit;;
+  loop_objects shapes
+
+
+let illuminate (shp: shape_attr) intersection normal origin =
+
+  let c_diff = map_colour_from_255_to_1 (vec3_of_colour shp.colour) in
+
+  let ambient = (scale c_diff 0.05) in (*Ambient*)
+  
+  let rec loop_pls pls =
+    match pls with
+    | [] -> Vector3(0., 0., 0.)
+    | h :: t ->
+      let distance_to_light = (magnitude (subtract h.position intersection)) in
+      let illumination = get_illumination_of_pointlight c_diff h.intensity distance_to_light in
+
+      let l = normalise (subtract h.position intersection) in
+      let r = normalise (reflect_v1_in_v2 l normal) in
+      let v = normalise (subtract origin intersection) in
+
+      let c_spec = map_colour_from_255_to_1 (vec3_of_colour h.colour) in
+    
+      if ((find_closest_hit (Ray(subtract intersection (scale normal 0.0001), l))).distance > distance_to_light) then
+        let diffuse = (scale (scale (scale c_diff shp.k_d) illumination) (max 0. (dot normal l))) in
+        let specular = (scale (scale (scale c_spec shp.k_s) illumination) ((max 0. (dot r v)) ** shp.phong_alpha)) in
+        add (add specular diffuse) (loop_pls t)
+      else (loop_pls t);
+  in
+  colour_of_vec3 (map_colour_from_1_to_255 (add (loop_pls pls) ambient));;
 
 let trace ray =
   let hit = find_closest_hit ray in
