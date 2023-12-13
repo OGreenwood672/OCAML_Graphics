@@ -1,2 +1,33 @@
 (library
- (name vector3))
+ (name globals)
+ (libraries vector3)
+ (modules globals))
+
+(library
+ (name vector3)
+ (modules vector3))
+
+(library
+ (name colour)
+ (libraries vector3)
+ (modules colour))
+
+(library
+ (name physics)
+ (libraries vector3 globals shapes)
+ (modules physics))
+
+(library
+ (name shapes)
+ (libraries vector3 colour)
+ (modules shapes))
+
+(library
+ (name lights)
+ (libraries vector3 colour globals)
+ (modules lights))
+
+(library
+ (name raytracing_lib)
+ (libraries globals vector3 shapes colour lights)
+ (modules raytracing_lib))

@@ -1,4 +1,5 @@
 
+
 type vec3 =
   | Vector3 of float * float * float;;
 
@@ -6,8 +7,6 @@ let dot v1 v2 =
   match v1, v2 with
   | Vector3(a, b, c), Vector3(x, y, z) ->
     a *. x +. b *. y +. c *. z;;
-
-
 
 let add v1 v2 =
   match v1, v2 with

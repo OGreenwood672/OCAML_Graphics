@@ -1,4 +1,4 @@
 (executable
  (public_name raytracing)
  (name main)
- (libraries graphics vector3))
+ (libraries graphics vector3 raytracing_lib))
