@@ -3,6 +3,7 @@ open Vector3;;
 open Colour;;
 open Raytracing_lib;;
 open Globals;;
+open Physics;;
 
 open_graph (" " ^ (string_of_int px_width) ^ "x" ^ (string_of_int px_height));;
 
@@ -39,8 +40,9 @@ try
       else if key = 'z' then camera_pos := add !camera_pos (Vector3(0., 0., -1. *. movement))
       else if key = 'x' then camera_pos := add !camera_pos (Vector3(0., 0., movement))
       else if key = 'c' then rotation := add !rotation (Vector3(0., -1. *. rotation_step, 0.))
-      else if key = 'v' then rotation := add !rotation (Vector3(0., rotation_step, 0.));
-      
+      else if key = 'v' then rotation := add !rotation (Vector3(0., rotation_step, 0.))
+      else if key = 'p' then move 2. phyx_objs; do_collisions phyx_objs;
+
       remember_mode true;
       draw_image (draw_frame ()) 0 0;
       remember_mode false;

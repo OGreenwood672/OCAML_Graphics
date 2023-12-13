@@ -6,15 +6,17 @@ let px_height = 600;;
 let movement = 0.5;;
 let rotation_step = 0.05;;
 
+let gravity = Vector3(0.01633, 0., 0.)
+
 let pi = 4.0 *. atan 1.0;;
 let epsilon = 0.0001;;
 
-let camera_pos = ref (Vector3(0., 0., 0.));;
+let camera_pos = ref (Vector3(0., 0., -10.));;
 let aspect_ratio = (float_of_int px_width) /. (float_of_int px_height)
 
 let rotation = ref (Vector3(0., 0., 0.))
 
-let fov = pi /. 4.0
+let fov = pi /. 3.0
 let wld_width = 2.0 *. tan (fov /. 2.0)
 let wld_height = wld_width /. aspect_ratio
 

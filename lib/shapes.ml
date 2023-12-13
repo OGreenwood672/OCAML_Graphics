@@ -7,13 +7,13 @@ type ray =
 let get_sphere_normal center pos = normalise (subtract pos center);;
 
 type sphere_info = {
-  center: vec3;
+  center: vec3 ref;
   radius: float;
 };;
 
 type plane_info = {
   normal: vec3;
-  point: vec3;
+  point: vec3 ref;
 };;
 
 type shape_info =
@@ -36,8 +36,8 @@ let sphere1: shape_attr = {
   phong_alpha = 10.;
   reflectivity = 0.3;
   shp_info=Sphere({
-    center = Vector3(0., 1., 4.);
-    radius=0.5;
+    center = ref (Vector3(-2., -2., 17.));
+    radius=1.4;
   });
 };;
 
@@ -48,8 +48,8 @@ let sphere2: shape_attr = {
   phong_alpha = 10.;
   reflectivity = 0.3;
   shp_info=Sphere({
-    center = Vector3(0., -1., 4.);
-    radius=0.93;
+    center = ref (Vector3(0., 3., 20.));
+    radius = 2.;
   });
 };;
 
@@ -60,8 +60,8 @@ let plane1: shape_attr = {
   phong_alpha = 10.;
   reflectivity = 0.;
   shp_info=Plane({
-    point = Vector3(1., 0., 2.);
-    normal=Vector3(1., 0., 0.);
+    point = ref (Vector3(5., 0., 2.));
+    normal = Vector3(1., 0., 0.);
   });
 };;
 
