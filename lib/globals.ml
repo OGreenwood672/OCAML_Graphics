@@ -1,7 +1,9 @@
 open Vector3;;
 
-let px_width = 600
-let px_height = 600;;
+let px_width = 750
+let px_height = 750;;
+
+let simulation = true;;
 
 let movement = 0.5;;
 let rotation_step = 0.05;;

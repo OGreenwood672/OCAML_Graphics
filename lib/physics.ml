@@ -45,6 +45,20 @@ let sphere_plane_collision sphere_phyx plane_phyx sphere_info plane_info =
     )
   );;
 
+let sphere_sphere_collision sphere_phyx1 sphere_phyx2 sphere_info1 sphere_info2 =
+  let distance = magnitude (subtract !(sphere_info2.center) !(sphere_info1.center)) in
+  let overlap = sphere_info1.radius +. sphere_info2.radius -. distance in
+  if overlap > 0.0 then (
+    let direction = normalise (subtract !(sphere_info2.center) !(sphere_info1.center)) in
+    let half_overlap = overlap /. 2.0 in
+
+    sphere_info1.center := add !(sphere_info1.center) (scale direction half_overlap);
+    sphere_info2.center := add !(sphere_info2.center) (scale direction (-. half_overlap));
+
+    sphere_phyx1.velocity := collide !(sphere_phyx1.velocity) direction ((sphere_phyx1.e +. sphere_phyx2.e) /. 2.0);
+    sphere_phyx2.velocity := collide !(sphere_phyx2.velocity) direction ((sphere_phyx1.e +. sphere_phyx2.e) /. 2.0);
+  )
+
 let rec move ms_since_update = function
   | [] -> ()
   | phyx_obj :: t ->
@@ -79,13 +93,15 @@ let rec do_collisions = function
         | Plane(plane_info), Sphere(sphere_info) ->
           sphere_plane_collision h h2 sphere_info plane_info;
           do_collisions_subloop t2;
-        | Sphere(_), Sphere(_) -> do_collisions_subloop t2;
+        | Sphere(sphere_info1), Sphere(sphere_info2) ->
+          sphere_sphere_collision h h2 sphere_info1 sphere_info2;
+          do_collisions_subloop t2;
         | Plane(_), Plane(_) -> do_collisions_subloop t2;
     in
     do_collisions_subloop t
 
 let phyx_objs = [
-  make_rigid_body sphere1.shp_info 1. 0.5 false;
-  make_rigid_body sphere2.shp_info 1. 0.5 false;
+  make_rigid_body sphere1.shp_info 1. 0.9 false;
+  make_rigid_body sphere2.shp_info 1. 0.9 true;
   make_rigid_body plane1.shp_info 1. 1. true;
 ]

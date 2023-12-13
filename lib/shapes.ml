@@ -36,7 +36,7 @@ let sphere1: shape_attr = {
   phong_alpha = 10.;
   reflectivity = 0.3;
   shp_info=Sphere({
-    center = ref (Vector3(-2., -2., 17.));
+    center = ref (Vector3(-2., -2., 20.));
     radius=1.4;
   });
 };;
@@ -48,7 +48,7 @@ let sphere2: shape_attr = {
   phong_alpha = 10.;
   reflectivity = 0.3;
   shp_info=Sphere({
-    center = ref (Vector3(0., 3., 20.));
+    center = ref (Vector3(0., 3., 18.5));
     radius = 2.;
   });
 };;

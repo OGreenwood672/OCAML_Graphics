@@ -21,7 +21,7 @@ let pl2 = {
 };;
 
 let pl3 = {
-  position = Vector3(0.8, -2., 19.);
+  position = Vector3(0.8, -2., 17.);
   colour = (rgb 255 255 255);
   intensity = 10.;
 };;
